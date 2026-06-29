@@ -7,7 +7,7 @@ import { LiveClock } from "@/components/LiveClock";
 import { NoticeCard } from "@/components/NoticeCard";
 import { RoutineList, getStatuses, type ClassRow } from "@/components/RoutineList";
 import { formatCountdown, getBdParts, timeToMinutes, type Day } from "@/lib/timezone";
-import { Timer } from "lucide-react";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -62,21 +62,11 @@ function Index() {
           </h1>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-4">
-          <div className="md:col-span-2"><LiveClock /></div>
-          <div className="glass-card rounded-2xl p-5 flex flex-col justify-center">
-            <div className="text-xs uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1.5" suppressHydrationWarning>
-              <Timer className="size-3.5" />
-              {currentClass ? "Current class ends in" : nextClass ? "Next class starts in" : "No upcoming class"}
-            </div>
-            <div className="text-2xl sm:text-3xl font-mono font-bold mt-1 tabular-nums text-gradient" suppressHydrationWarning>
-              {countdown ?? "—"}
-            </div>
-            <div className="text-xs text-muted-foreground mt-1 truncate" suppressHydrationWarning>
-              {currentClass?.subject ?? nextClass?.subject ?? "All done for today"}
-            </div>
-          </div>
-        </div>
+        <LiveClock
+          countdown={countdown}
+          countdownLabel={currentClass ? "Current class ends in" : nextClass ? "Next class starts in" : "No upcoming class"}
+          countdownSubject={currentClass?.subject ?? nextClass?.subject ?? "All done for today"}
+        />
 
         <NoticeCard />
 
