@@ -12,7 +12,7 @@ import { Timer } from "lucide-react";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Today's Class — Class Portal" },
+      { title: "Today's Class — Class Portal CST 5th" },
       { name: "description", content: "Live class routine and notices for today, on Bangladesh time." },
     ],
   }),

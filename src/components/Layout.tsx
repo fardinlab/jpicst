@@ -14,7 +14,7 @@ export function Header() {
             <GraduationCap className="size-5 text-primary-foreground" />
           </div>
           <div className="leading-tight">
-            <div className="font-bold text-sm sm:text-base">Class Portal</div>
+            <div className="font-bold text-sm sm:text-base">Class Portal CST 5th</div>
             <div className="text-[10px] sm:text-xs text-muted-foreground">Routine & Notices</div>
           </div>
         </Link>

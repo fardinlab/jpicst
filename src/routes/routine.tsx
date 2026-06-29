@@ -9,7 +9,7 @@ import { getBdParts } from "@/lib/timezone";
 export const Route = createFileRoute("/routine")({
   head: () => ({
     meta: [
-      { title: "Weekly Routine — Class Portal" },
+      { title: "Weekly Routine — Class Portal CST 5th" },
       { name: "description", content: "Browse the full weekly class routine by day." },
     ],
   }),
