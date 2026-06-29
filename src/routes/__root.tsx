@@ -120,12 +120,31 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const [persister] = useState(() =>
+    typeof window === "undefined"
+      ? null
+      : createSyncStoragePersister({ storage: window.localStorage, key: "cp-cache-v1" }),
+  );
+
+  useEffect(() => {
+    registerPush().catch(() => {});
+  }, []);
+
+  if (!persister) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <Outlet />
+        <Toaster richColors position="top-right" />
+      </QueryClientProvider>
+    );
+  }
 
   return (
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider client={queryClient} persistOptions={{ persister, maxAge: 1000 * 60 * 60 * 24 * 7 }}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
       <Toaster richColors position="top-right" />
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   );
 }
+
