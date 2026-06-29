@@ -90,7 +90,7 @@ function AuthPage() {
           </button>
 
           <p className="text-[11px] text-muted-foreground mt-4 text-center">
-            New accounts need to be granted the <code className="text-foreground">admin</code> role from the database before they can manage content.
+            The first account to sign up is automatically granted admin access.
           </p>
         </div>
       </div>
