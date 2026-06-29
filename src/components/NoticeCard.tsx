@@ -8,8 +8,10 @@ type Notice = {
   title: string;
   description: string;
   is_pinned: boolean;
+  published: boolean;
   created_at: string;
 };
+
 
 const CACHE_KEY = "cached_latest_notice_v1";
 
