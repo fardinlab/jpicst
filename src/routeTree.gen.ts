@@ -15,6 +15,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
+import { Route as AuthenticatedAdminNoticesRouteImport } from './routes/_authenticated/admin.notices'
 import { Route as AuthenticatedAdminClassesRouteImport } from './routes/_authenticated/admin.classes'
 
 const RoutineRoute = RoutineRouteImport.update({
@@ -46,6 +47,12 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedAdminNoticesRoute =
+  AuthenticatedAdminNoticesRouteImport.update({
+    id: '/notices',
+    path: '/notices',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminClassesRoute =
   AuthenticatedAdminClassesRouteImport.update({
     id: '/classes',
@@ -59,6 +66,7 @@ export interface FileRoutesByFullPath {
   '/routine': typeof RoutineRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/admin/classes': typeof AuthenticatedAdminClassesRoute
+  '/admin/notices': typeof AuthenticatedAdminNoticesRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRoutesByTo {
@@ -66,6 +74,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/routine': typeof RoutineRoute
   '/admin/classes': typeof AuthenticatedAdminClassesRoute
+  '/admin/notices': typeof AuthenticatedAdminNoticesRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRoutesById {
@@ -76,6 +85,7 @@ export interface FileRoutesById {
   '/routine': typeof RoutineRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/admin/classes': typeof AuthenticatedAdminClassesRoute
+  '/_authenticated/admin/notices': typeof AuthenticatedAdminNoticesRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRouteTypes {
@@ -86,9 +96,16 @@ export interface FileRouteTypes {
     | '/routine'
     | '/admin'
     | '/admin/classes'
+    | '/admin/notices'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/routine' | '/admin/classes' | '/admin'
+  to:
+    | '/'
+    | '/auth'
+    | '/routine'
+    | '/admin/classes'
+    | '/admin/notices'
+    | '/admin'
   id:
     | '__root__'
     | '/'
@@ -97,6 +114,7 @@ export interface FileRouteTypes {
     | '/routine'
     | '/_authenticated/admin'
     | '/_authenticated/admin/classes'
+    | '/_authenticated/admin/notices'
     | '/_authenticated/admin/'
   fileRoutesById: FileRoutesById
 }
@@ -151,6 +169,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/notices': {
+      id: '/_authenticated/admin/notices'
+      path: '/notices'
+      fullPath: '/admin/notices'
+      preLoaderRoute: typeof AuthenticatedAdminNoticesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/classes': {
       id: '/_authenticated/admin/classes'
       path: '/classes'
@@ -163,11 +188,13 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminClassesRoute: typeof AuthenticatedAdminClassesRoute
+  AuthenticatedAdminNoticesRoute: typeof AuthenticatedAdminNoticesRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminClassesRoute: AuthenticatedAdminClassesRoute,
+  AuthenticatedAdminNoticesRoute: AuthenticatedAdminNoticesRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
 
