@@ -82,14 +82,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "CST Class Portal" },
+      { name: "description", content: "CST Class Portal is a modern student portal that provides today's class schedule, weekly routine, real-time notices, and important academic updates." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "CST Class Portal" },
+      { property: "og:description", content: "CST Class Portal is a modern student portal that provides today's class schedule, weekly routine, real-time notices, and important academic updates." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "CST Class Portal" },
+      { name: "twitter:description", content: "CST Class Portal is a modern student portal that provides today's class schedule, weekly routine, real-time notices, and important academic updates." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/99d719af-5509-4d1c-b805-795ecea2dbb0" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/99d719af-5509-4d1c-b805-795ecea2dbb0" },
     ],
     links: [
       {
