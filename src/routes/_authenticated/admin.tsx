@@ -35,11 +35,11 @@ function AdminLayout() {
     navigate({ to: "/auth" });
   }
 
-  const items = [
+  const items: Array<{ to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean }> = [
     { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
     { to: "/admin/classes", label: "Manage Routine", icon: CalendarRange },
     { to: "/admin/notices", label: "Manage Notices", icon: Megaphone },
-  ] as const;
+  ];
 
   if (isAdmin === false) {
     return (
