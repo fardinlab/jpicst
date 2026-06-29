@@ -77,6 +77,8 @@ export async function showLocalNotice(title: string, body: string) {
         id: Date.now() % 2_000_000_000,
         title,
         body,
+        smallIcon: "ic_stat_icon",
+        iconColor: "#4F46E5",
         schedule: { at: new Date(Date.now() + 100) },
       },
     ],
