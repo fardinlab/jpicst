@@ -14,7 +14,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
-import { registerPush } from "@/lib/native";
+import { startNotificationRegistration } from "@/lib/native";
 
 
 function NotFoundComponent() {
@@ -128,7 +128,7 @@ function RootComponent() {
 
   useEffect(() => {
     setPersister(createSyncStoragePersister({ storage: window.localStorage, key: "cp-cache-v1" }));
-    registerPush().catch(() => {});
+    return startNotificationRegistration();
   }, []);
 
   if (!persister) {
