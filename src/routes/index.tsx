@@ -6,6 +6,7 @@ import { PageShell } from "@/components/Layout";
 import { LiveClock } from "@/components/LiveClock";
 import { NoticeCard } from "@/components/NoticeCard";
 import { RoutineList, getStatuses, type ClassRow } from "@/components/RoutineList";
+import { getOfflineClassesForDay } from "@/lib/offline-data";
 import { formatCountdown, getBdParts, timeToMinutes, type Day } from "@/lib/timezone";
 
 
@@ -30,14 +31,19 @@ function Index() {
   const { data: classes = [] } = useQuery({
     queryKey: ["classes", "today", now.weekday],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("classes")
-        .select("*")
-        .eq("day", now.weekday)
-        .order("start_time");
-      if (error) throw error;
-      return data as ClassRow[];
+      try {
+        const { data, error } = await supabase
+          .from("classes")
+          .select("*")
+          .eq("day", now.weekday)
+          .order("start_time");
+        if (error) throw error;
+        return data as ClassRow[];
+      } catch {
+        return getOfflineClassesForDay(now.weekday);
+      }
     },
+    networkMode: "offlineFirst",
   });
 
   const statuses = getStatuses(classes, now.minutes, now.weekday as Day);

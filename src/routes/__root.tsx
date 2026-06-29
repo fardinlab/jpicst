@@ -124,13 +124,10 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const [persister] = useState(() =>
-    typeof window === "undefined"
-      ? null
-      : createSyncStoragePersister({ storage: window.localStorage, key: "cp-cache-v1" }),
-  );
+  const [persister, setPersister] = useState<ReturnType<typeof createSyncStoragePersister> | null>(null);
 
   useEffect(() => {
+    setPersister(createSyncStoragePersister({ storage: window.localStorage, key: "cp-cache-v1" }));
     registerPush().catch(() => {});
   }, []);
 

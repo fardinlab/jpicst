@@ -20,19 +20,23 @@ export function NoticeCard() {
   const [loading, setLoading] = useState(false);
 
   async function load() {
-    const { data } = await supabase
-      .from("notices")
-      .select("*")
-      .eq("published", true)
-      .order("is_pinned", { ascending: false })
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    const n = (data as Notice | null) ?? null;
-    setNotice(n);
-    setLoading(false);
-    if (n) {
-      try { window.localStorage.setItem(CACHE_KEY, JSON.stringify(n)); } catch {}
+    try {
+      const { data, error } = await supabase
+        .from("notices")
+        .select("*")
+        .eq("published", true)
+        .order("is_pinned", { ascending: false })
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      const n = (data as Notice | null) ?? null;
+      setNotice(n);
+      if (n) {
+        try { window.localStorage.setItem(CACHE_KEY, JSON.stringify(n)); } catch {}
+      }
+    } finally {
+      setLoading(false);
     }
   }
 
