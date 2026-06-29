@@ -16,15 +16,7 @@ type Notice = {
 const CACHE_KEY = "cached_latest_notice_v1";
 
 export function NoticeCard() {
-  const [notice, setNotice] = useState<Notice | null>(() => {
-    if (typeof window === "undefined") return null;
-    try {
-      const raw = window.localStorage.getItem(CACHE_KEY);
-      return raw ? (JSON.parse(raw) as Notice) : null;
-    } catch {
-      return null;
-    }
-  });
+  const [notice, setNotice] = useState<Notice | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function load() {
@@ -45,6 +37,11 @@ export function NoticeCard() {
   }
 
   useEffect(() => {
+    // hydrate from cache after mount to avoid SSR/client mismatch
+    try {
+      const raw = window.localStorage.getItem(CACHE_KEY);
+      if (raw) setNotice(JSON.parse(raw) as Notice);
+    } catch {}
     load();
     const channel = supabase
       .channel("notices-public")
