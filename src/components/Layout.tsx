@@ -1,6 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Calendar, CalendarDays, Shield, GraduationCap } from "lucide-react";
 import { type ReactNode } from "react";
+import { NotificationBell } from "./NotificationBell";
 
 export function Header() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -22,6 +23,7 @@ export function Header() {
           <NavLink to="/" active={isActive("/")} icon={<Calendar className="size-4" />} label="Today" />
           <NavLink to="/routine" active={isActive("/routine")} icon={<CalendarDays className="size-4" />} label="Weekly" />
           <NavLink to="/auth" active={pathname.startsWith("/auth") || pathname.startsWith("/admin")} icon={<Shield className="size-4" />} label="Admin" />
+          <NotificationBell />
         </nav>
       </div>
     </header>
