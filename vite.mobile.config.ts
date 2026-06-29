@@ -11,7 +11,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   root: "mobile",
   publicDir: "../public",
-  plugins: [tailwindcss(), tsConfigPaths({ projects: ["../tsconfig.json"] }), react()],
+  plugins: [tailwindcss(), tsConfigPaths({ projects: [path.resolve(__dirname, "tsconfig.json")] }), react()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),
