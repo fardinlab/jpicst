@@ -1,7 +1,11 @@
-import { Capacitor } from "@capacitor/core";
+import { Capacitor, type PluginListenerHandle } from "@capacitor/core";
 import { supabase } from "@/integrations/supabase/client";
 
 export const isNative = () => Capacitor.isNativePlatform();
+
+let savedPushToken: string | null = null;
+let pushRegistrationPromise: Promise<string | null> | null = null;
+let autoRegistrationStarted = false;
 
 async function saveTokenToServer(token: string, platform: string) {
   try {
@@ -20,6 +24,9 @@ async function saveTokenToServer(token: string, platform: string) {
  * - On web: requests Notification API permission.
  */
 export async function registerPush(): Promise<string | null> {
+  if (savedPushToken) return savedPushToken;
+  if (pushRegistrationPromise) return pushRegistrationPromise;
+
   if (!isNative()) {
     if (typeof window === "undefined" || !("Notification" in window)) return null;
     try {
@@ -33,31 +40,98 @@ export async function registerPush(): Promise<string | null> {
     }
   }
 
-  const { PushNotifications } = await import("@capacitor/push-notifications");
-  const { LocalNotifications } = await import("@capacitor/local-notifications");
-
-  const localPerm = await LocalNotifications.checkPermissions();
-  if (localPerm.display !== "granted") {
-    await LocalNotifications.requestPermissions();
-  }
-
-  const perm = await PushNotifications.checkPermissions();
-  let granted = perm.receive === "granted";
-  if (!granted) {
-    const req = await PushNotifications.requestPermissions();
-    granted = req.receive === "granted";
-  }
-  if (!granted) return null;
-
-  return new Promise((resolve) => {
-    const tokenListener = PushNotifications.addListener("registration", async (t) => {
-      tokenListener.then((l) => l.remove());
-      await saveTokenToServer(t.value, Capacitor.getPlatform());
-      resolve(t.value);
-    });
-    PushNotifications.addListener("registrationError", () => resolve(null));
-    PushNotifications.register();
+  pushRegistrationPromise = registerNativePush().finally(() => {
+    pushRegistrationPromise = null;
   });
+
+  return pushRegistrationPromise;
+}
+
+async function registerNativePush(): Promise<string | null> {
+  try {
+    const { PushNotifications } = await import("@capacitor/push-notifications");
+    const { LocalNotifications } = await import("@capacitor/local-notifications");
+
+    const current = await PushNotifications.checkPermissions();
+    let receivePermission = current.receive;
+
+    if (receivePermission !== "granted") {
+      const requested = await PushNotifications.requestPermissions();
+      receivePermission = requested.receive;
+    }
+
+    if (receivePermission !== "granted") return null;
+
+    const localPermission = await LocalNotifications.checkPermissions();
+    if (localPermission.display !== "granted") {
+      await LocalNotifications.requestPermissions();
+    }
+
+    if (Capacitor.getPlatform() === "android") {
+      await PushNotifications.createChannel({
+        id: "notices",
+        name: "Class Portal Notices",
+        description: "Routine and notice alerts",
+        importance: 5,
+        visibility: 1,
+        vibration: true,
+      }).catch(() => {});
+    }
+
+    return await new Promise<string | null>(async (resolve) => {
+      let settled = false;
+      let registrationListener: PluginListenerHandle | undefined;
+      let errorListener: PluginListenerHandle | undefined;
+
+      const finish = async (token: string | null) => {
+        if (settled) return;
+        settled = true;
+        window.clearTimeout(timeoutId);
+        registrationListener?.remove();
+        errorListener?.remove();
+        if (token) {
+          savedPushToken = token;
+          await saveTokenToServer(token, Capacitor.getPlatform());
+        }
+        resolve(token);
+      };
+
+      const timeoutId = window.setTimeout(() => finish(null), 15_000);
+
+      registrationListener = await PushNotifications.addListener("registration", (token) => {
+        void finish(token.value);
+      });
+      errorListener = await PushNotifications.addListener("registrationError", () => {
+        void finish(null);
+      });
+
+      await PushNotifications.register();
+    });
+  } catch (error) {
+    console.warn("push registration failed", error);
+    return null;
+  }
+}
+
+export function startNotificationRegistration() {
+  if (typeof window === "undefined" || autoRegistrationStarted) return;
+  autoRegistrationStarted = true;
+
+  const request = () => {
+    void registerPush();
+  };
+
+  request();
+  const retryTimer = window.setTimeout(request, 1_000);
+
+  window.addEventListener("pointerdown", request, { once: true, passive: true });
+  window.addEventListener("focus", request, { passive: true });
+
+  return () => {
+    window.clearTimeout(retryTimer);
+    window.removeEventListener("pointerdown", request);
+    window.removeEventListener("focus", request);
+  };
 }
 
 /** Fire a local notification (used when realtime delivers a new notice while the app is open). */
