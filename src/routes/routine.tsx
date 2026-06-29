@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PageShell } from "@/components/Layout";
 import { RoutineList, type ClassRow } from "@/components/RoutineList";
+import { getOfflineClassesForDay } from "@/lib/offline-data";
 import { getBdParts } from "@/lib/timezone";
 
 export const Route = createFileRoute("/routine")({
@@ -26,14 +27,19 @@ function RoutinePage() {
   const { data: classes = [], isLoading } = useQuery({
     queryKey: ["classes", day],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("classes")
-        .select("*")
-        .eq("day", day)
-        .order("start_time");
-      if (error) throw error;
-      return data as ClassRow[];
+      try {
+        const { data, error } = await supabase
+          .from("classes")
+          .select("*")
+          .eq("day", day)
+          .order("start_time");
+        if (error) throw error;
+        return data as ClassRow[];
+      } catch {
+        return getOfflineClassesForDay(day);
+      }
     },
+    networkMode: "offlineFirst",
   });
 
   return (
