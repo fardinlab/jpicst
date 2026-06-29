@@ -1,18 +1,31 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Pin, Megaphone } from "lucide-react";
+import { showLocalNotice } from "@/lib/native";
 
 type Notice = {
   id: string;
   title: string;
   description: string;
   is_pinned: boolean;
+  published: boolean;
   created_at: string;
 };
 
+
+const CACHE_KEY = "cached_latest_notice_v1";
+
 export function NoticeCard() {
-  const [notice, setNotice] = useState<Notice | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [notice, setNotice] = useState<Notice | null>(() => {
+    if (typeof window === "undefined") return null;
+    try {
+      const raw = window.localStorage.getItem(CACHE_KEY);
+      return raw ? (JSON.parse(raw) as Notice) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [loading, setLoading] = useState(false);
 
   async function load() {
     const { data } = await supabase
@@ -23,18 +36,31 @@ export function NoticeCard() {
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
-    setNotice(data as Notice | null);
+    const n = (data as Notice | null) ?? null;
+    setNotice(n);
     setLoading(false);
+    if (n) {
+      try { window.localStorage.setItem(CACHE_KEY, JSON.stringify(n)); } catch {}
+    }
   }
 
   useEffect(() => {
     load();
     const channel = supabase
       .channel("notices-public")
-      .on("postgres_changes", { event: "*", schema: "public", table: "notices" }, () => load())
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "notices" }, (payload) => {
+        const n = payload.new as Notice;
+        if (n.published) {
+          showLocalNotice(n.title, n.description.slice(0, 140));
+        }
+        load();
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "notices" }, () => load())
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "notices" }, () => load())
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, []);
+
 
   if (loading) return <div className="glass-card rounded-2xl p-6 h-32 animate-pulse" />;
   if (!notice) return null;
