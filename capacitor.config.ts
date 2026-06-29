@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
-  appId: "app.lovable.classportalcst5th",
+  appId: "app.fardinlab.classportalcst5th",
   appName: "Class Portal CST 5th",
   webDir: "dist",
   server: {
