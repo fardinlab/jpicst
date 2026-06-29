@@ -57,7 +57,7 @@ function Index() {
           <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-semibold mb-2">
             আজকের ক্লাস
           </div>
-          <h1 className="text-3xl sm:text-5xl font-bold tracking-tight">
+          <h1 className="text-3xl sm:text-5xl font-bold tracking-tight" suppressHydrationWarning>
             <span className="text-gradient">{now.weekday}</span> Schedule
           </h1>
         </div>
@@ -65,14 +65,14 @@ function Index() {
         <div className="grid md:grid-cols-3 gap-4">
           <div className="md:col-span-2"><LiveClock /></div>
           <div className="glass-card rounded-2xl p-5 flex flex-col justify-center">
-            <div className="text-xs uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1.5">
+            <div className="text-xs uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1.5" suppressHydrationWarning>
               <Timer className="size-3.5" />
               {currentClass ? "Current class ends in" : nextClass ? "Next class starts in" : "No upcoming class"}
             </div>
-            <div className="text-2xl sm:text-3xl font-mono font-bold mt-1 tabular-nums text-gradient">
+            <div className="text-2xl sm:text-3xl font-mono font-bold mt-1 tabular-nums text-gradient" suppressHydrationWarning>
               {countdown ?? "—"}
             </div>
-            <div className="text-xs text-muted-foreground mt-1 truncate">
+            <div className="text-xs text-muted-foreground mt-1 truncate" suppressHydrationWarning>
               {currentClass?.subject ?? nextClass?.subject ?? "All done for today"}
             </div>
           </div>
