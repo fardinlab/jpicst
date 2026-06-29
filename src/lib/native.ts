@@ -1,15 +1,25 @@
 import { Capacitor } from "@capacitor/core";
+import { supabase } from "@/integrations/supabase/client";
 
 export const isNative = () => Capacitor.isNativePlatform();
 
+async function saveTokenToServer(token: string, platform: string) {
+  try {
+    await supabase.from("device_tokens").upsert(
+      { token, platform, updated_at: new Date().toISOString() },
+      { onConflict: "token" },
+    );
+  } catch (e) {
+    console.warn("save token failed", e);
+  }
+}
+
 /**
  * Request notification permission.
- * - On native (Capacitor): registers for FCM/APNS push, returns token.
- * - On web: requests Notification API permission, returns "web" if granted.
- * Returns null if denied / unsupported.
+ * - On native (Capacitor): registers for FCM/APNS push, saves token to Supabase.
+ * - On web: requests Notification API permission.
  */
 export async function registerPush(): Promise<string | null> {
-  // --- Web browser / PWA ---
   if (!isNative()) {
     if (typeof window === "undefined" || !("Notification" in window)) return null;
     try {
@@ -23,11 +33,9 @@ export async function registerPush(): Promise<string | null> {
     }
   }
 
-  // --- Native (Android / iOS) ---
   const { PushNotifications } = await import("@capacitor/push-notifications");
   const { LocalNotifications } = await import("@capacitor/local-notifications");
 
-  // also ask for local-notification permission so in-app banners work
   const localPerm = await LocalNotifications.checkPermissions();
   if (localPerm.display !== "granted") {
     await LocalNotifications.requestPermissions();
@@ -42,8 +50,9 @@ export async function registerPush(): Promise<string | null> {
   if (!granted) return null;
 
   return new Promise((resolve) => {
-    const tokenListener = PushNotifications.addListener("registration", (t) => {
+    const tokenListener = PushNotifications.addListener("registration", async (t) => {
       tokenListener.then((l) => l.remove());
+      await saveTokenToServer(t.value, Capacitor.getPlatform());
       resolve(t.value);
     });
     PushNotifications.addListener("registrationError", () => resolve(null));
@@ -53,7 +62,6 @@ export async function registerPush(): Promise<string | null> {
 
 /** Fire a local notification (used when realtime delivers a new notice while the app is open). */
 export async function showLocalNotice(title: string, body: string) {
-  // Web fallback
   if (!isNative()) {
     if (typeof window === "undefined" || !("Notification" in window)) return;
     if (Notification.permission !== "granted") return;
@@ -85,11 +93,6 @@ export async function showLocalNotice(title: string, body: string) {
   });
 }
 
-/**
- * Trigger permission request from a user gesture (button click).
- * Browsers block permission prompts that aren't tied to a user gesture,
- * so the initial auto-call on mount silently fails. Call this from onClick.
- */
 export async function requestNotificationPermission(): Promise<boolean> {
   const token = await registerPush();
   return token !== null;
