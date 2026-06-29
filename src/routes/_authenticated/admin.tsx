@@ -101,11 +101,7 @@ function AdminLayout() {
           </nav>
         </aside>
         <section>
-          {isAdmin === null ? (
-            <div className="glass-card rounded-2xl p-10 text-center text-muted-foreground">Loading…</div>
-          ) : (
-            <Outlet />
-          )}
+          <Outlet />
         </section>
       </div>
     </div>
