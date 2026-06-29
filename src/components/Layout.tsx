@@ -50,7 +50,7 @@ export function PageShell({ children }: { children: ReactNode }) {
       <Header />
       <main className="mx-auto max-w-6xl px-3 sm:px-6 py-6 sm:py-10">{children}</main>
       <footer className="text-center text-xs text-muted-foreground py-8">
-        Built with care · Bangladesh Time (Asia/Dhaka)
+        Fardin Sagor | CST | JPI
       </footer>
     </div>
   );
