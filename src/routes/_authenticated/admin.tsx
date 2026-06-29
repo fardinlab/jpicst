@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, Link, useRouterState, useNavigate, redirect } from "@tanstack/react-router";
+import { createFileRoute, Outlet, Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Layout";
@@ -17,16 +17,19 @@ function AdminLayout() {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(async ({ data }) => {
-      if (!data.user) { navigate({ to: "/auth" }); return; }
+    let cancelled = false;
+    (async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) { navigate({ to: "/auth" }); return; }
       const { data: role } = await supabase
         .from("user_roles")
         .select("role")
-        .eq("user_id", data.user.id)
+        .eq("user_id", userData.user.id)
         .eq("role", "admin")
         .maybeSingle();
-      setIsAdmin(!!role);
-    });
+      if (!cancelled) setIsAdmin(!!role);
+    })();
+    return () => { cancelled = true; };
   }, [navigate]);
 
   async function handleSignOut() {
@@ -34,6 +37,7 @@ function AdminLayout() {
     toast.success("Signed out");
     navigate({ to: "/auth" });
   }
+
 
   const items: Array<{ to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean }> = [
     { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
